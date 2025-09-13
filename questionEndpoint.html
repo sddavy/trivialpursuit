@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Question Endpoint</title>
+</head>
+<body>
+<script>
+// Listen for messages from other pages (or fetch requests)
+async function getQuestion(category, timeframe) {
+    const query = `${category} ${timeframe}`;
+    try {
+        const searchRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
+        const data = await searchRes.json();
+        const results = data.query.search;
+        if (!results || results.length === 0) {
+            return { question: null, answer: "No questions found." };
+        }
+
+        const randomIndex = Math.floor(Math.random() * results.length);
+        const pageTitle = results[randomIndex].title;
+
+        const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pageTitle)}`);
+        const summaryData = await summaryRes.json();
+
+        return {
+            question: `What is "${pageTitle}"?`,
+            answer: summaryData.extract || "No summary available."
+        };
+    } catch (err) {
+        return { question: null, answer: "Error fetching question." };
+    }
+}
+
+// Expose a global function for the main page to call
+window.fetchQuestion = getQuestion;
+</script>
+</body>
+</html>
