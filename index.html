@@ -233,7 +233,6 @@
     h2 { font-size: 18px; }
     .btn-grid, .dropdown-grid { flex-direction: column; align-items: center; gap: 10px; }
   }
-
 </style>
 </head>
 <body>
@@ -412,19 +411,29 @@ function populateCategories(edition) {
     btn.dataset.category = cat.name;
     btn.textContent = cat.name;
 
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
       const timeframe = `${oldestYearSelect.value} - ${newestYearSelect.value}`;
       const headerText = `${timeframe} ${cat.name}`;
 
       document.getElementById("cardFront").style.background = cat.color;
       document.getElementById("cardBack").style.background = cat.color;
-
       frontHeader.textContent = headerText;
       backHeader.textContent = headerText;
 
-      frontQuestion.textContent = `Sample ${cat.name} Question?`;
-      backQuestion.textContent = `Sample ${cat.name} Question?`;
-      cardAnswer.textContent = "Sample Answer";
+      // Fetch question from "backend" page
+      try {
+        const response = await fetch(`questionEndpoint.html?category=${encodeURIComponent(cat.name)}&timeframe=${encodeURIComponent(timeframe)}`);
+        const text = await response.text();
+        const data = JSON.parse(text);
+
+        frontQuestion.textContent = data.question;
+        backQuestion.textContent = data.question;
+        cardAnswer.textContent = data.answer;
+      } catch (err) {
+        frontQuestion.textContent = "Error fetching question.";
+        backQuestion.textContent = "Error fetching question.";
+        cardAnswer.textContent = err.toString();
+      }
 
       categoriesScreen.classList.remove("active");
       cardScreen.classList.add("active");
@@ -460,7 +469,6 @@ card.addEventListener("click", () => {
 
 closeFront.addEventListener("click", e => { e.stopPropagation(); flipCount = 0; card.querySelector(".card-inner").style.transform = 'rotateY(0deg)'; cardScreen.classList.remove("active"); categoriesScreen.classList.add("active"); });
 closeBack.addEventListener("click", e => { e.stopPropagation(); flipCount = 0; card.querySelector(".card-inner").style.transform = 'rotateY(0deg)'; cardScreen.classList.remove("active"); categoriesScreen.classList.add("active"); });
-
 </script>
 
 </body>
