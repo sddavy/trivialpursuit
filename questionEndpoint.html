@@ -6,34 +6,44 @@
 </head>
 <body>
 <script>
-// Listen for messages from other pages (or fetch requests)
-async function getQuestion(category, timeframe) {
-    const query = `${category} ${timeframe}`;
+/**
+ * fetchQuestion(category, timeframe)
+ * Called from parent page iframe to get a random question
+ * Returns a Promise that resolves to {question: "...", answer: "..."}
+ */
+async function fetchQuestion(category, timeframe) {
     try {
-        const searchRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
-        const data = await searchRes.json();
-        const results = data.query.search;
-        if (!results || results.length === 0) {
-            return { question: null, answer: "No questions found." };
+        // Construct a search query combining category and timeframe
+        const query = `${category} ${timeframe}`;
+
+        // Call Wikipedia API
+        const response = await fetch(`https://en.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=20`);
+        const data = await response.json();
+
+        if(!data.query.search.length){
+            return {question: `No question found for ${category}`, answer: ""};
         }
 
-        const randomIndex = Math.floor(Math.random() * results.length);
-        const pageTitle = results[randomIndex].title;
+        // Pick a random article from search results
+        const article = data.query.search[Math.floor(Math.random() * data.query.search.length)];
 
-        const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pageTitle)}`);
-        const summaryData = await summaryRes.json();
+        // Fetch the full article extract (summary)
+        const pageResponse = await fetch(`https://en.wikipedia.org/w/api.php?origin=*&action=query&prop=extracts&exintro&explaintext&format=json&pageids=${article.pageid}`);
+        const pageData = await pageResponse.json();
+        const page = pageData.query.pages[article.pageid];
 
-        return {
-            question: `What is "${pageTitle}"?`,
-            answer: summaryData.extract || "No summary available."
-        };
+        const extract = page.extract || "No content available.";
+
+        // Build a simple question: "What is X?" and answer is the extract
+        const questionText = `What is ${page.title}?`;
+        const answerText = extract;
+
+        return { question: questionText, answer: answerText };
+
     } catch (err) {
-        return { question: null, answer: "Error fetching question." };
+        return { question: "Error fetching question", answer: err.message };
     }
 }
-
-// Expose a global function for the main page to call
-window.fetchQuestion = getQuestion;
 </script>
 </body>
 </html>
