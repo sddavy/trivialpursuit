@@ -209,6 +209,7 @@ newestYearSelect.addEventListener("change", checkStartReady);
 
 function populateCategories(edition) {
   categoryGrid.innerHTML = "";
+
   editionCategories[edition].forEach(cat => {
     const btn = document.createElement("button");
     btn.classList.add("btn", "category-btn");
@@ -219,6 +220,7 @@ function populateCategories(edition) {
     btn.addEventListener("click", async () => {
       const timeframe = `${oldestYearSelect.value} - ${newestYearSelect.value}`;
       const headerText = `${timeframe} ${cat.name}`;
+
       document.getElementById("cardFront").style.background = cat.color;
       document.getElementById("cardBack").style.background = cat.color;
       frontHeader.textContent = headerText;
@@ -228,12 +230,14 @@ function populateCategories(edition) {
       try {
         const res = await fetch(`https://trivialpursuit.samuel-d-davy09.workers.dev/?category=${encodeURIComponent(cat.name)}&timeframe=${encodeURIComponent(timeframe)}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
         const data = await res.json();
 
         frontQuestion.textContent = data.question || "No question found";
         backQuestion.textContent = data.question || "No question found";
         cardAnswer.textContent = data.answer || "No answer found";
       } catch (err) {
+        console.error(err);
         frontQuestion.textContent = "Error fetching question";
         backQuestion.textContent = "Error fetching question";
         cardAnswer.textContent = err.toString();
@@ -247,6 +251,7 @@ function populateCategories(edition) {
   });
 }
 
+// ===================== Setup buttons =====================
 startGameBtn.addEventListener("click", () => {
   setupScreen.classList.remove("active");
   populateCategories(selectedEdition);
@@ -271,8 +276,21 @@ card.addEventListener("click", () => {
   card.querySelector(".card-inner").style.transform = `rotateY(${180 * flipCount}deg)`;
 });
 
-closeFront.addEventListener("click", e => { e.stopPropagation(); flipCount = 0; card.querySelector(".card-inner").style.transform = 'rotateY(0deg)'; cardScreen.classList.remove("active"); categoriesScreen.classList.add("active"); });
-closeBack.addEventListener("click", e => { e.stopPropagation(); flipCount = 0; card.querySelector(".card-inner").style.transform = 'rotateY(0deg)'; cardScreen.classList.remove("active"); categoriesScreen.classList.add("active"); });
+closeFront.addEventListener("click", e => {
+  e.stopPropagation();
+  flipCount = 0;
+  card.querySelector(".card-inner").style.transform = 'rotateY(0deg)';
+  cardScreen.classList.remove("active");
+  categoriesScreen.classList.add("active");
+});
+
+closeBack.addEventListener("click", e => {
+  e.stopPropagation();
+  flipCount = 0;
+  card.querySelector(".card-inner").style.transform = 'rotateY(0deg)';
+  cardScreen.classList.remove("active");
+  categoriesScreen.classList.add("active");
+});
 </script>
 
 </body>
