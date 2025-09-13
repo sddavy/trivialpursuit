@@ -229,10 +229,6 @@ const categoriesScreen = document.getElementById("categoriesScreen");
 const cardScreen = document.getElementById("cardScreen");
 const startGameBtn = document.getElementById("startGame");
 const editionBtns = document.querySelectorAll(".edition-btn");
-const categoryGrid = document.getElementById("categoryGrid");
-const oldestYearSelect = document.getElementById("oldestYear");
-const newestYearSelect = document.getElementById("newestYear");
-
 const card = document.getElementById("card");
 const frontHeader = document.getElementById("frontHeader");
 const backHeader = document.getElementById("backHeader");
@@ -241,29 +237,62 @@ const backQuestion = document.getElementById("backQuestion");
 const cardAnswer = document.getElementById("cardAnswer");
 const closeFront = document.getElementById("closeFront");
 const closeBack = document.getElementById("closeBack");
-const nextQuestionBtn = document.getElementById("nextQuestion");
 const backToSetupBtn = document.getElementById("backToSetup");
+const nextQuestionBtn = document.getElementById("nextQuestion");
+const categoryGrid = document.getElementById("categoryGrid");
+const oldestYearSelect = document.getElementById("oldestYear");
+const newestYearSelect = document.getElementById("newestYear");
 
 let selectedEdition = null;
 let flipCount = 0;
 
+// ===================== Categories per Edition =====================
 const editionCategories = {
-  "Genus Edition (1981)": ["Geography", "Entertainment", "History", "Art & Literature", "Science & Nature", "Sports & Leisure"],
-  "Millennium (1998)": ["People & Places", "Arts & Entertainment", "History", "Science & Nature", "Sports & Leisure", "Wild Card"],
-  "20th Anniversary (2002)": ["Global View", "Sound & Screen", "News", "The Written Word", "Innovations", "Game Time"],
-  "25th Silver Anniversary (2008)": ["Geography", "Entertainment", "History", "Art & Literature", "Science & Nature", "Sports & Leisure"]
+  "Genus Edition (1981)": [
+    { name: "Geography", color: "#1976d2" },
+    { name: "Entertainment", color: "#e91e63" },
+    { name: "History", color: "#fbc02d" },
+    { name: "Art & Literature", color: "#6d4c41" },
+    { name: "Science & Nature", color: "#388e3c" },
+    { name: "Sports & Leisure", color: "#f57c00" }
+  ],
+  "Millennium (1998)": [
+    { name: "People & Places", color: "#018dd6" },
+    { name: "Arts & Entertainment", color: "#c9356c" },
+    { name: "History", color: "#eac157" },
+    { name: "Science & Nature", color: "#77a375" },
+    { name: "Sports & Leisure", color: "#78a474" },
+    { name: "Wild Card", color: "#ea9974" }
+  ],
+  "20th Anniversary (2002)": [
+    { name: "Global View", color: "#3f5486" },
+    { name: "Sound & Screen", color: "#a24664" },
+    { name: "News", color: "#d2b374" },
+    { name: "The Written Word", color: "#9f836d" },
+    { name: "Innovations", color: "#85b18f" },
+    { name: "Game Time", color: "#c38053" }
+  ],
+  "25th Silver Anniversary (2008)": [
+    { name: "Geography", color: "#01a6dc" },
+    { name: "Entertainment", color: "#ff4199" },
+    { name: "History", color: "#fcf505" },
+    { name: "Art & Literature", color: "#7e0085" },
+    { name: "Science & Nature", color: "#147c40" },
+    { name: "Sports & Leisure", color: "#e84f00" }
+  ]
 };
 
-function updateSelections(btns, selectedVar){
+// ===================== Edition & Timeframe Selection =====================
+function updateSelections(btns, selectedVar) {
   btns.forEach(btn => btn.classList.toggle("disabled", btn.textContent !== selectedVar));
 }
 
-function checkStartReady(){
+function checkStartReady() {
   startGameBtn.disabled = !(selectedEdition && oldestYearSelect.value && newestYearSelect.value);
 }
 
-editionBtns.forEach(btn=>{
-  btn.addEventListener("click",()=>{
+editionBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
     selectedEdition = btn.textContent;
     updateSelections(editionBtns, selectedEdition);
     checkStartReady();
@@ -273,81 +302,96 @@ editionBtns.forEach(btn=>{
 oldestYearSelect.addEventListener("change", checkStartReady);
 newestYearSelect.addEventListener("change", checkStartReady);
 
-function populateCategories(edition){
+// ===================== Populate Categories =====================
+function populateCategories(edition) {
   categoryGrid.innerHTML = "";
-  editionCategories[edition].forEach(cat=>{
+  editionCategories[edition].forEach(cat => {
     const btn = document.createElement("button");
-    btn.classList.add("btn");
-    btn.textContent = cat;
+    btn.classList.add("btn", "category-btn");
+    btn.style.background = cat.color;
+    btn.dataset.category = cat.name;
+    btn.textContent = cat.name;
 
-    btn.addEventListener("click", async ()=>{
+    btn.addEventListener("click", async () => {
       const timeframe = `${oldestYearSelect.value} - ${newestYearSelect.value}`;
-      frontHeader.textContent = `${timeframe} ${cat}`;
-      backHeader.textContent = `${timeframe} ${cat}`;
+      const headerText = `${timeframe} ${cat.name}`;
+      frontHeader.textContent = headerText;
+      backHeader.textContent = headerText;
 
-      frontQuestion.textContent = "Loading...";
-      backQuestion.textContent = "";
-      cardAnswer.textContent = "";
+      // Set card colors
+      document.getElementById("cardFront").style.background = cat.color;
+      document.getElementById("cardBack").style.background = cat.color;
 
-      setupScreen.classList.remove("active");
+      // Fetch question from questionEndpoint.html
+      try {
+        const iframe = document.getElementById("questionIframe");
+        const result = await iframe.contentWindow.fetchQuestion(cat.name, timeframe);
+
+        frontQuestion.textContent = result.question;
+        backQuestion.textContent = result.question;
+        cardAnswer.textContent = result.answer;
+      } catch(err) {
+        frontQuestion.textContent = "Error fetching question";
+        backQuestion.textContent = "Error fetching question";
+        cardAnswer.textContent = err.message;
+      }
+
       categoriesScreen.classList.remove("active");
       cardScreen.classList.add("active");
-
-      // Fetch question from backend page
-      const iframe = document.createElement("iframe");
-      iframe.src = "questionEndpoint.html";
-      iframe.style.display = "none";
-      document.body.appendChild(iframe);
-      iframe.onload = async ()=>{
-        const result = await iframe.contentWindow.fetchQuestion(cat, timeframe);
-        frontQuestion.textContent = result.question;
-        backQuestion.textContent = result.answer;
-        document.body.removeChild(iframe);
-      };
+      flipCount = 0;
+      card.querySelector(".card-inner").style.transform = "rotateY(0deg)";
     });
 
     categoryGrid.appendChild(btn);
   });
 }
 
-startGameBtn.addEventListener("click", ()=>{
-  populateCategories(selectedEdition);
+// ===================== Start Game Button =====================
+startGameBtn.addEventListener("click", () => {
   setupScreen.classList.remove("active");
+  populateCategories(selectedEdition);
   categoriesScreen.classList.add("active");
 });
 
-backToSetupBtn.addEventListener("click", ()=>{
+// ===================== Back Button =====================
+backToSetupBtn.addEventListener("click", () => {
   categoriesScreen.classList.remove("active");
   setupScreen.classList.add("active");
 });
 
-nextQuestionBtn.addEventListener("click", e=>{
+// ===================== Card Flip & Next Question =====================
+card.addEventListener("click", () => {
+  flipCount++;
+  card.querySelector(".card-inner").style.transform = `rotateY(${180 * flipCount}deg)`;
+});
+
+nextQuestionBtn.addEventListener("click", async e => {
   e.stopPropagation();
   flipCount = 0;
   card.querySelector(".card-inner").style.transform = "rotateY(0deg)";
+  categoriesScreen.classList.add("active");
+  cardScreen.classList.remove("active");
+});
+
+closeFront.addEventListener("click", e => {
+  e.stopPropagation();
+  flipCount = 0;
+  card.querySelector(".card-inner").style.transform = 'rotateY(0deg)';
   cardScreen.classList.remove("active");
   categoriesScreen.classList.add("active");
 });
 
-card.addEventListener("click", ()=>{
-  flipCount++;
-  card.querySelector(".card-inner").style.transform = `rotateY(${180*flipCount}deg)`;
-});
-
-closeFront.addEventListener("click", e=>{
+closeBack.addEventListener("click", e => {
   e.stopPropagation();
-  flipCount=0;
-  card.querySelector(".card-inner").style.transform='rotateY(0deg)';
-  cardScreen.classList.remove("active");
-  categoriesScreen.classList.add("active");
-});
-closeBack.addEventListener("click", e=>{
-  e.stopPropagation();
-  flipCount=0;
-  card.querySelector(".card-inner").style.transform='rotateY(0deg)';
+  flipCount = 0;
+  card.querySelector(".card-inner").style.transform = 'rotateY(0deg)';
   cardScreen.classList.remove("active");
   categoriesScreen.classList.add("active");
 });
 </script>
+
+<!-- Add this invisible iframe somewhere in your body -->
+<iframe id="questionIframe" src="questionEndpoint.html" style="display:none;"></iframe>
+
 </body>
 </html>
