@@ -5,34 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trivial Pursuit Prototype</title>
 <style>
-  /* ===================== Body ===================== */
   body {
-    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    font-family: Arial, sans-serif;
     height: 100vh;
     background: black;
     overflow: hidden;
   }
 
-  /* ===================== Screens ===================== */
   .screen {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.5s ease;
     background: black;
     box-sizing: border-box;
   }
-  .screen.active {
-    opacity: 1;
-    pointer-events: auto;
-    z-index: 1;
-  }
+  .screen.active { opacity: 1; pointer-events: auto; z-index: 1; }
 
   .screen-inner {
     display: flex;
@@ -42,76 +34,40 @@
     box-sizing: border-box;
   }
 
-  h2 {
-    text-align: center;
-    margin: 20px 0;
-    color: white;
-  }
+  h2 { text-align: center; color: white; margin: 20px 0; }
 
   .btn-grid {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
-    padding: 0 20px;
   }
 
-  /* ===================== Buttons ===================== */
   .btn {
-    width: 90%;
-    max-width: 300px;
-    padding: 15px 20px;
-    font-size: 16px;
-    border: none;
-    border-radius: 8px;
-    background: #ddd;
-    cursor: pointer;
-    text-align: center;
-    transition: transform 0.1s, background 0.2s;
+    width: 90%; max-width: 300px;
+    padding: 15px 20px; font-size: 16px;
+    border: none; border-radius: 8px;
+    background: #ddd; cursor: pointer;
     flex: 1 1 calc(50% - 20px);
+    transition: transform 0.1s, background 0.2s;
   }
-  .btn:hover:not(.disabled) { background: #bbb; }
-  .btn:active { transform: scale(0.95); }
-  .disabled { background: #eee; color: #aaa; cursor: default; }
+  .btn:hover:not(.disabled){ background: #bbb; }
+  .btn:active{ transform: scale(0.95); }
+  .disabled{ background: #eee; color: #aaa; cursor: default; }
 
-  /* ===================== Start Game Button ===================== */
   #startGame {
-    width: 90%;
-    max-width: 300px;
-    padding: 15px 0;
-    font-size: 18px;
-    border-radius: 12px;
-    background: #007bff;
+    width: 90%; max-width: 300px;
+    padding: 15px 0; font-size: 18px;
+    border-radius: 12px; background: #007bff;
     color: white;
   }
-  #startGame:disabled { background: #aaa; }
+  #startGame:disabled{ background: #aaa; }
 
-  /* ===================== Footer ===================== */
   .footer {
-    margin-top: auto; /* pushes footer to bottom */
-    display: flex;
-    justify-content: center;
-  }
-  .footer .btn {
-    width: 90%;
-    max-width: 300px;
-    padding: 15px 0;
-    font-size: 18px;
-    border-radius: 12px;
-    background: #555;
-    color: white;
-    font-weight: bold;
-    transition: background 0.2s;
-  }
-  .footer .btn:hover { background: #777; }
-
-  .content-top {
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* spacing between board buttons, headers, and dropdowns */
+    margin-top: auto;
+    display: flex; justify-content: center;
   }
 
-  /* ===================== Dropdowns ===================== */
   .dropdown-grid {
     display: flex;
     justify-content: center;
@@ -119,121 +75,73 @@
     flex-wrap: wrap;
     margin: 10px 0 20px 0;
   }
-  .custom-select {
-    position: relative;
-    display: inline-block;
-  }
+
   .custom-select select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
     padding: 12px 40px 12px 15px;
     border-radius: 12px;
     border: 1px solid #ccc;
     background: #f0f0f0;
-    cursor: pointer;
     font-size: 16px;
-  }
-  .custom-select::after {
-    content: "▼";
-    position: absolute;
-    top: 50%;
-    right: 15px;
-    transform: translateY(-50%);
-    pointer-events: none;
-    color: #333; 
-    font-size: 14px;
+    cursor: pointer;
   }
 
-  /* ===================== Card Styles ===================== */
+  /* Card Styles */
   .card {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
+    top: 10px; left: 10px; right: 10px; bottom: 10px;
     border-radius: 20px;
     overflow: hidden;
     perspective: 1000px;
   }
   .card-inner {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     position: relative;
     transform-style: preserve-3d;
     transition: transform 0.6s;
     cursor: pointer;
   }
   .card-face {
-    position: absolute;
-    width: 100%;
-    height: 100%;
+    position: absolute; width: 100%; height: 100%;
     backface-visibility: hidden;
-    border-radius: 20px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    color: white;
+    border-radius: 20px; overflow: hidden;
+    display: flex; flex-direction: column;
+    padding: 20px; color: white; text-align: center;
     box-sizing: border-box;
-    padding: 20px;
   }
-  .card-back { transform: rotateY(180deg); }
+  .card-back{ transform: rotateY(180deg); }
+
   .card-face .header {
     position: absolute;
-    top: 20px;
-    left: 20px;
-    right: 60px;
-    font-size: 20px;
-    font-weight: bold;
+    top: 20px; left: 20px; right: 60px;
+    font-size: 20px; font-weight: bold;
     text-align: left;
   }
   .card-face .content-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding-top: 60px; /* space below header */
-    box-sizing: border-box;
-  }
-  .center-content {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
+    margin-top: 60px;
   }
-  .next-btn {
-    margin-top: auto; /* sticks to bottom */
-    padding: 10px 24px;
-    font-size: 16px;
-    border-radius: 10px;
-    background: #555;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-  }
-  .next-btn:hover { background: #777; }
-  .next-btn:active { transform: scale(0.97); }
 
-  .question { font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center; }
-  .answer { font-size: 20px; text-align: center; }
+  .question, .answer { font-size: 20px; margin: 10px 0; }
+
+  .next-btn {
+    padding: 10px 24px; font-size: 16px;
+    border-radius: 10px; background: #555;
+    color: white; border: none; cursor: pointer;
+    align-self: center; margin-top: auto;
+  }
+  .next-btn:hover{ background: #777; }
+  .next-btn:active{ transform: scale(0.97); }
 
   .close-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    font-size: 32px;
-    font-weight: bold;
-    cursor: pointer;
-    color: white;
+    position: absolute; top: 20px; right: 20px;
+    font-size: 32px; font-weight: bold;
+    cursor: pointer; color: white;
   }
-
-  @media (max-width: 500px) {
-    .btn { padding: 12px; font-size: 14px; }
-    h2 { font-size: 18px; }
-    .btn-grid, .dropdown-grid { flex-direction: column; align-items: center; gap: 10px; }
-  }
-
 </style>
 </head>
 <body>
@@ -241,42 +149,37 @@
 <!-- Setup Screen -->
 <div id="setupScreen" class="screen active">
   <div class="screen-inner">
-    <div class="content-top">
-      <h2>Select Board</h2>
-      <div class="btn-grid" id="editionOptions">
-        <button class="btn edition-btn">Genus Edition (1981)</button>
-        <button class="btn edition-btn">Millennium (1998)</button>
-        <button class="btn edition-btn">20th Anniversary (2002)</button>
-        <button class="btn edition-btn">25th Silver Anniversary (2008)</button>
-      </div>
+    <h2>Select Board</h2>
+    <div class="btn-grid" id="editionOptions">
+      <button class="btn edition-btn">Genus Edition (1981)</button>
+      <button class="btn edition-btn">Millennium (1998)</button>
+      <button class="btn edition-btn">20th Anniversary (2002)</button>
+      <button class="btn edition-btn">25th Silver Anniversary (2008)</button>
+    </div>
 
-      <h2>Select Timeframe</h2>
-      <div class="dropdown-grid">
-        <div class="custom-select">
-          <select id="oldestYear">
-            <option value="">Oldest Year</option>
-            <option value="1950">1950</option>
-            <option value="1960">1960</option>
-            <option value="1970">1970</option>
-            <option value="1980">1980</option>
-            <option value="1990">1990</option>
-            <option value="2000">2000</option>
-            <option value="2010">2010</option>
-            <option value="2020">2020</option>
-          </select>
-        </div>
-        <div class="custom-select">
-          <select id="newestYear">
-            <option value="">Newest Year</option>
-            <option value="1970">1970</option>
-            <option value="1980">1980</option>
-            <option value="1990">1990</option>
-            <option value="2000">2000</option>
-            <option value="2010">2010</option>
-            <option value="2020">2020</option>
-          </select>
-        </div>
-      </div>
+    <h2>Select Timeframe</h2>
+    <div class="dropdown-grid">
+      <select id="oldestYear">
+        <option value="">Oldest Year</option>
+        <option value="1950">1950</option>
+        <option value="1960">1960</option>
+        <option value="1970">1970</option>
+        <option value="1980">1980</option>
+        <option value="1990">1990</option>
+        <option value="2000">2000</option>
+        <option value="2010">2010</option>
+        <option value="2020">2020</option>
+      </select>
+
+      <select id="newestYear">
+        <option value="">Newest Year</option>
+        <option value="1970">1970</option>
+        <option value="1980">1980</option>
+        <option value="1990">1990</option>
+        <option value="2000">2000</option>
+        <option value="2010">2010</option>
+        <option value="2020">2020</option>
+      </select>
     </div>
 
     <div class="footer">
@@ -288,10 +191,8 @@
 <!-- Categories Screen -->
 <div id="categoriesScreen" class="screen">
   <div class="screen-inner">
-    <div>
-      <h2>Select a Category</h2>
-      <div class="btn-grid" id="categoryGrid"></div>
-    </div>
+    <h2>Select a Category</h2>
+    <div class="btn-grid" id="categoryGrid"></div>
     <div class="footer">
       <button id="backToSetup" class="btn">Setup</button>
     </div>
@@ -306,19 +207,15 @@
         <span class="close-btn" id="closeFront">&times;</span>
         <div class="header" id="frontHeader">Category Header</div>
         <div class="content-wrapper">
-          <div class="center-content">
-            <div class="question" id="frontQuestion">Sample Question</div>
-          </div>
+          <div class="question" id="frontQuestion">Question will appear here</div>
         </div>
       </div>
       <div class="card-face card-back" id="cardBack">
         <span class="close-btn" id="closeBack">&times;</span>
         <div class="header" id="backHeader">Category Header</div>
         <div class="content-wrapper">
-          <div class="center-content">
-            <div class="question" id="backQuestion">Sample Question</div>
-            <div class="answer" id="cardAnswer">Sample Answer</div>
-          </div>
+          <div class="question" id="backQuestion">Answer will appear here</div>
+          <div class="answer" id="cardAnswer"></div>
           <button class="next-btn" id="nextQuestion">Next Question</button>
         </div>
       </div>
@@ -332,6 +229,10 @@ const categoriesScreen = document.getElementById("categoriesScreen");
 const cardScreen = document.getElementById("cardScreen");
 const startGameBtn = document.getElementById("startGame");
 const editionBtns = document.querySelectorAll(".edition-btn");
+const categoryGrid = document.getElementById("categoryGrid");
+const oldestYearSelect = document.getElementById("oldestYear");
+const newestYearSelect = document.getElementById("newestYear");
+
 const card = document.getElementById("card");
 const frontHeader = document.getElementById("frontHeader");
 const backHeader = document.getElementById("backHeader");
@@ -340,60 +241,29 @@ const backQuestion = document.getElementById("backQuestion");
 const cardAnswer = document.getElementById("cardAnswer");
 const closeFront = document.getElementById("closeFront");
 const closeBack = document.getElementById("closeBack");
-const backToSetupBtn = document.getElementById("backToSetup");
 const nextQuestionBtn = document.getElementById("nextQuestion");
-const categoryGrid = document.getElementById("categoryGrid");
-const oldestYearSelect = document.getElementById("oldestYear");
-const newestYearSelect = document.getElementById("newestYear");
+const backToSetupBtn = document.getElementById("backToSetup");
 
 let selectedEdition = null;
 let flipCount = 0;
 
 const editionCategories = {
-  "Genus Edition (1981)": [
-    { name: "Geography", color: "#1976d2" },
-    { name: "Entertainment", color: "#e91e63" },
-    { name: "History", color: "#fbc02d" },
-    { name: "Art & Literature", color: "#6d4c41" },
-    { name: "Science & Nature", color: "#388e3c" },
-    { name: "Sports & Leisure", color: "#f57c00" }
-  ],
-  "Millennium (1998)": [
-    { name: "People & Places", color: "#018dd6" },
-    { name: "Arts & Entertainment", color: "#c9356c" },
-    { name: "History", color: "#eac157" },
-    { name: "Science & Nature", color: "#886b64" },
-    { name: "Sports & Leisure", color: "#78a474" },
-    { name: "Wild Card", color: "#ea9974" }
-  ],
-  "20th Anniversary (2002)": [
-    { name: "Global View", color: "#3f5486" },
-    { name: "Sound & Screen", color: "#a24664" },
-    { name: "News", color: "#d2b374" },
-    { name: "The Written Word", color: "#9f836d" },
-    { name: "Innovations", color: "#85b18f" },
-    { name: "Game Time", color: "#c38053" }
-  ],
-  "25th Silver Anniversary (2008)": [
-    { name: "Geography", color: "#01a6dc" },
-    { name: "Entertainment", color: "#ff4199" },
-    { name: "History", color: "#fcf505" },
-    { name: "Art & Literature", color: "#7e0085" },
-    { name: "Science & Nature", color: "#147c40" },
-    { name: "Sports & Leisure", color: "#e84f00" }
-  ]
+  "Genus Edition (1981)": ["Geography", "Entertainment", "History", "Art & Literature", "Science & Nature", "Sports & Leisure"],
+  "Millennium (1998)": ["People & Places", "Arts & Entertainment", "History", "Science & Nature", "Sports & Leisure", "Wild Card"],
+  "20th Anniversary (2002)": ["Global View", "Sound & Screen", "News", "The Written Word", "Innovations", "Game Time"],
+  "25th Silver Anniversary (2008)": ["Geography", "Entertainment", "History", "Art & Literature", "Science & Nature", "Sports & Leisure"]
 };
 
-function updateSelections(btns, selectedVar) {
+function updateSelections(btns, selectedVar){
   btns.forEach(btn => btn.classList.toggle("disabled", btn.textContent !== selectedVar));
 }
 
-function checkStartReady() {
+function checkStartReady(){
   startGameBtn.disabled = !(selectedEdition && oldestYearSelect.value && newestYearSelect.value);
 }
 
-editionBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
+editionBtns.forEach(btn=>{
+  btn.addEventListener("click",()=>{
     selectedEdition = btn.textContent;
     updateSelections(editionBtns, selectedEdition);
     checkStartReady();
@@ -403,65 +273,81 @@ editionBtns.forEach(btn => {
 oldestYearSelect.addEventListener("change", checkStartReady);
 newestYearSelect.addEventListener("change", checkStartReady);
 
-function populateCategories(edition) {
+function populateCategories(edition){
   categoryGrid.innerHTML = "";
-  editionCategories[edition].forEach(cat => {
+  editionCategories[edition].forEach(cat=>{
     const btn = document.createElement("button");
-    btn.classList.add("btn", "category-btn");
-    btn.style.background = cat.color;
-    btn.dataset.category = cat.name;
-    btn.textContent = cat.name;
+    btn.classList.add("btn");
+    btn.textContent = cat;
 
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async ()=>{
       const timeframe = `${oldestYearSelect.value} - ${newestYearSelect.value}`;
-      const headerText = `${timeframe} ${cat.name}`;
+      frontHeader.textContent = `${timeframe} ${cat}`;
+      backHeader.textContent = `${timeframe} ${cat}`;
 
-      document.getElementById("cardFront").style.background = cat.color;
-      document.getElementById("cardBack").style.background = cat.color;
+      frontQuestion.textContent = "Loading...";
+      backQuestion.textContent = "";
+      cardAnswer.textContent = "";
 
-      frontHeader.textContent = headerText;
-      backHeader.textContent = headerText;
-
-      frontQuestion.textContent = `Sample ${cat.name} Question?`;
-      backQuestion.textContent = `Sample ${cat.name} Question?`;
-      cardAnswer.textContent = "Sample Answer";
-
+      setupScreen.classList.remove("active");
       categoriesScreen.classList.remove("active");
       cardScreen.classList.add("active");
+
+      // Fetch question from backend page
+      const iframe = document.createElement("iframe");
+      iframe.src = "questionEndpoint.html";
+      iframe.style.display = "none";
+      document.body.appendChild(iframe);
+      iframe.onload = async ()=>{
+        const result = await iframe.contentWindow.fetchQuestion(cat, timeframe);
+        frontQuestion.textContent = result.question;
+        backQuestion.textContent = result.answer;
+        document.body.removeChild(iframe);
+      };
     });
 
     categoryGrid.appendChild(btn);
   });
 }
 
-startGameBtn.addEventListener("click", () => {
-  setupScreen.classList.remove("active");
+startGameBtn.addEventListener("click", ()=>{
   populateCategories(selectedEdition);
+  setupScreen.classList.remove("active");
   categoriesScreen.classList.add("active");
 });
 
-backToSetupBtn.addEventListener("click", () => {
+backToSetupBtn.addEventListener("click", ()=>{
   categoriesScreen.classList.remove("active");
   setupScreen.classList.add("active");
 });
 
-nextQuestionBtn.addEventListener("click", e => {
+nextQuestionBtn.addEventListener("click", e=>{
   e.stopPropagation();
   flipCount = 0;
-  card.querySelector(".card-inner").style.transform = `rotateY(0deg)`;
+  card.querySelector(".card-inner").style.transform = "rotateY(0deg)";
   cardScreen.classList.remove("active");
   categoriesScreen.classList.add("active");
 });
 
-card.addEventListener("click", () => {
+card.addEventListener("click", ()=>{
   flipCount++;
-  card.querySelector(".card-inner").style.transform = `rotateY(${180 * flipCount}deg)`;
+  card.querySelector(".card-inner").style.transform = `rotateY(${180*flipCount}deg)`;
 });
 
-closeFront.addEventListener("click", e => { e.stopPropagation(); flipCount = 0; card.querySelector(".card-inner").style.transform = 'rotateY(0deg)'; cardScreen.classList.remove("active"); categoriesScreen.classList.add("active"); });
-closeBack.addEventListener("click", e => { e.stopPropagation(); flipCount = 0; card.querySelector(".card-inner").style.transform = 'rotateY(0deg)'; cardScreen.classList.remove("active"); categoriesScreen.classList.add("active"); });
-
+closeFront.addEventListener("click", e=>{
+  e.stopPropagation();
+  flipCount=0;
+  card.querySelector(".card-inner").style.transform='rotateY(0deg)';
+  cardScreen.classList.remove("active");
+  categoriesScreen.classList.add("active");
+});
+closeBack.addEventListener("click", e=>{
+  e.stopPropagation();
+  flipCount=0;
+  card.querySelector(".card-inner").style.transform='rotateY(0deg)';
+  cardScreen.classList.remove("active");
+  categoriesScreen.classList.add("active");
+});
 </script>
-
 </body>
 </html>
