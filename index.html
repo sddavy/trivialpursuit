@@ -54,6 +54,7 @@
         <button class="btn edition-btn">20th Anniversary (2002)</button>
         <button class="btn edition-btn">25th Silver Anniversary (2008)</button>
       </div>
+
       <h2>Select Timeframe</h2>
       <div class="dropdown-grid">
         <div class="custom-select">
@@ -81,7 +82,20 @@
           </select>
         </div>
       </div>
+
+      <h2>Select Difficulty</h2>
+      <div class="dropdown-grid">
+        <div class="custom-select">
+          <select id="difficultySelect">
+            <option value="">Any</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+      </div>
     </div>
+
     <div class="footer">
       <button id="startGame" class="btn" disabled>Start Game</button>
     </div>
@@ -148,6 +162,7 @@ const nextQuestionBtn = document.getElementById("nextQuestion");
 const categoryGrid = document.getElementById("categoryGrid");
 const oldestYearSelect = document.getElementById("oldestYear");
 const newestYearSelect = document.getElementById("newestYear");
+const difficultySelect = document.getElementById("difficultySelect");
 
 let selectedEdition = null;
 let flipCount = 0;
@@ -187,6 +202,7 @@ const editionCategories = {
   ]
 };
 
+// ---------- Functions ----------
 function updateSelections(btns, selectedVar) {
   btns.forEach(btn => btn.classList.toggle("disabled", btn.textContent !== selectedVar));
 }
@@ -205,6 +221,7 @@ editionBtns.forEach(btn => {
 
 oldestYearSelect.addEventListener("change", checkStartReady);
 newestYearSelect.addEventListener("change", checkStartReady);
+difficultySelect.addEventListener("change", checkStartReady);
 
 function populateCategories(edition) {
   categoryGrid.innerHTML = "";
@@ -217,6 +234,7 @@ function populateCategories(edition) {
 
     btn.addEventListener("click", async () => {
       const timeframe = `${oldestYearSelect.value} - ${newestYearSelect.value}`;
+      const difficulty = difficultySelect.value || "any";
       const headerText = `${timeframe} ${cat.name}`;
       document.getElementById("cardFront").style.background = cat.color;
       document.getElementById("cardBack").style.background = cat.color;
@@ -224,21 +242,12 @@ function populateCategories(edition) {
       backHeader.textContent = headerText;
 
       try {
-        const res = await fetch(`https://trivialpursuit.samuel-d-davy09.workers.dev/?category=${encodeURIComponent(cat.name)}&timeframe=${encodeURIComponent(timeframe)}`);
+        const res = await fetch(`https://trivialpursuit.samuel-d-davy09.workers.dev/?category=${encodeURIComponent(cat.name)}&timeframe=${encodeURIComponent(timeframe)}&difficulty=${difficulty}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        // Render questions with line breaks
-        function renderQuestion(element, text) {
-          if (!text) element.innerHTML = "No question found";
-          else {
-            const decoded = text.replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, '&');
-            element.innerHTML = decoded.replace(/\n/g, "<br>");
-          }
-        }
-
-        renderQuestion(frontQuestion, data.question);
-        renderQuestion(backQuestion, data.question);
+        frontQuestion.textContent = data.question || "No question found";
+        backQuestion.textContent = data.question || "No question found";
         cardAnswer.textContent = data.answer || "No answer found";
       } catch (err) {
         frontQuestion.textContent = "Error fetching question";
