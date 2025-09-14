@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trivial Pursuit Prototype</title>
+<title>Online Trivial Pursuit</title>
 <style>
   /* ===================== Body ===================== */
   body { font-family: Arial, sans-serif; margin: 0; padding: 0; height: 100vh; background: black; overflow: hidden; }
@@ -233,9 +233,9 @@ function populateCategories(edition) {
 
         const data = await res.json();
 
-        frontQuestion.textContent = data.question || "No question found";
-        backQuestion.textContent = data.question || "No question found";
-        cardAnswer.textContent = data.answer || "No answer found";
+        frontQuestion.innerHTML = (data.question || "No question found").replace(/\n/g, "<br>");
+        backQuestion.innerHTML = (data.question || "No question found").replace(/\n/g, "<br>");
+        cardAnswer.innerHTML = data.answer || "No answer found";
       } catch (err) {
         console.error(err);
         frontQuestion.textContent = "Error fetching question";
