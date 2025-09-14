@@ -3,25 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trivial Pursuit Prototype</title>
+<title>Online Trivial Pursuit</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <style>
   body { font-family: Arial, sans-serif; margin: 0; padding: 0; height: 100vh; background: black; overflow: hidden; }
   .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; background: black; box-sizing: border-box; }
+  .screen:not(#setupScreen) .screen-inner { overflow: hidden; }
   .screen.active { opacity: 1; pointer-events: auto; z-index: 1; }
   .screen-inner { display: flex; flex-direction: column; height: 100%; padding: 20px; box-sizing: border-box; }
   h2 { text-align: center; margin: 20px 0; color: white; }
-  .btn-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 20px; }
-  .btn { width: 90%; max-width: 300px; padding: 15px 20px; font-size: 16px; border: none; border-radius: 8px; background: #ddd; cursor: pointer; text-align: center; transition: transform 0.1s, background 0.2s; flex: 1 1 calc(50% - 20px); }
+  .btn-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 50px; }
+  .btn { width: 90%; max-width: 300px; padding: 15px 10px; font-size: 16px; border: none; border-radius: 8px; background: #ddd; cursor: pointer; text-align: center; transition: transform 0.1s, background 0.2s; flex: 1 1 calc(50% - 20px); }
   .btn:hover:not(.disabled) { background: #bbb; }
   .btn:active { transform: scale(0.95); }
   .disabled { background: #eee; color: #aaa; cursor: default; }
   #startGame { width: 90%; max-width: 300px; padding: 15px 0; font-size: 18px; border-radius: 12px; background: #007bff; color: white; }
-  #startGame:disabled { background: #aaa; }
-  #setupScreen .screen-inner { max-height: 100vh; overflow-y: auto; -webkit-overflow-scrolling: touch;}
+  #startGame:disabled { background: #444; }
+  #setupScreen .screen-inner { max-height: 100vh; overflow-y: auto; box-sizing: border-box; -webkit-overflow-scrolling: touch; padding-bottom: 0px; }
+  #pageFooter { background-color: #000; color: #444; text-align: center; font-size: 14px; padding: 8px 0; margin-top: 20px; }
+  #pageFooter a { color: #444; text-decoration: underline; margin-left: 15px; }
+  #pageFooter a:hover { color: #888; }
   .footer { margin-top: auto; display: flex; justify-content: center; }
   .footer .btn { width: 90%; max-width: 300px; padding: 15px 0; font-size: 18px; border-radius: 12px; background: #555; color: white; font-weight: bold; transition: background 0.2s; }
   .footer .btn:hover { background: #777; }
-  .content-top { display: flex; flex-direction: column; gap: 20px; }
+  .content-top { display: flex; flex-direction: column; gap: 20px; margin-bottom: 100px; }
   .dropdown-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 10px 0 20px 0; }
   .custom-select { position: relative; display: inline-block; }
   .custom-select select { appearance: none; padding: 12px 40px 12px 15px; border-radius: 12px; border: 1px solid #ccc; background: #f0f0f0; cursor: pointer; font-size: 16px; }
@@ -100,6 +105,9 @@
     <div class="footer">
       <button id="startGame" class="btn" disabled>Start Game</button>
     </div>
+<footer id="pageFooter">
+      <p>&copy; 2025 Samuel Davy<a href="about.html">About</a></p>
+    </footer>
   </div>
 </div>
 
@@ -209,7 +217,12 @@ function updateSelections(btns, selectedVar) {
 }
 
 function checkStartReady() {
-  startGameBtn.disabled = !(selectedEdition && oldestYearSelect.value && newestYearSelect.value);
+  startGameBtn.disabled = !(
+    selectedEdition &&
+    oldestYearSelect.value &&
+    newestYearSelect.value &&
+    difficultySelect.value
+  );
 }
 
 editionBtns.forEach(btn => {
@@ -290,6 +303,35 @@ card.addEventListener("click", () => {
 
 closeFront.addEventListener("click", e => { e.stopPropagation(); flipCount = 0; card.querySelector(".card-inner").style.transform = 'rotateY(0deg)'; cardScreen.classList.remove("active"); categoriesScreen.classList.add("active"); });
 closeBack.addEventListener("click", e => { e.stopPropagation(); flipCount = 0; card.querySelector(".card-inner").style.transform = 'rotateY(0deg)'; cardScreen.classList.remove("active"); categoriesScreen.classList.add("active"); });
+
+// Ensure newest year >= oldest year
+oldestYearSelect.addEventListener("change", () => {
+  const oldest = parseInt(oldestYearSelect.value);
+  Array.from(newestYearSelect.options).forEach(opt => {
+    if (opt.value === "") return; // skip placeholder
+    opt.disabled = oldest ? parseInt(opt.value) < oldest : false;
+  });
+  // Auto-correct newest if current value is now invalid
+  if (newestYearSelect.value && parseInt(newestYearSelect.value) < oldest) {
+    newestYearSelect.value = "";
+  }
+  checkStartReady();
+});
+
+// Ensure oldest year <= newest year
+newestYearSelect.addEventListener("change", () => {
+  const newest = parseInt(newestYearSelect.value);
+  Array.from(oldestYearSelect.options).forEach(opt => {
+    if (opt.value === "") return; // skip placeholder
+    opt.disabled = newest ? parseInt(opt.value) > newest : false;
+  });
+  // Auto-correct oldest if current value is now invalid
+  if (oldestYearSelect.value && parseInt(oldestYearSelect.value) > newest) {
+    oldestYearSelect.value = "";
+  }
+  checkStartReady();
+});
+
 </script>
 
 </body>
