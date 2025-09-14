@@ -39,6 +39,31 @@
   .answer { font-size: 20px; text-align: center; }
   .close-btn { position: absolute; top: 20px; right: 20px; font-size: 32px; font-weight: bold; cursor: pointer; color: white; }
   @media (max-width: 500px) { .btn { padding: 12px; font-size: 14px; } h2 { font-size: 18px; } .btn-grid, .dropdown-grid { flex-direction: column; align-items: center; gap: 10px; } }
+  @media (max-height: 500px) and (orientation: landscape) {
+  .screen-inner {
+    padding: 10px;
+    height: auto;
+  }
+  .btn-grid, .dropdown-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .btn {
+    flex: 1 1 calc(33% - 10px);
+    font-size: 14px;
+    padding: 10px;
+  }
+  h2 {
+    font-size: 16px;
+    margin: 10px 0;
+  }
+  .footer .btn, #startGame {
+    font-size: 16px;
+    padding: 12px 0;
+  }
+}
+
 </style>
 </head>
 <body>
