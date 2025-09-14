@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Online Trivial Pursuit</title>
+<title>Trivial Pursuit Prototype</title>
 <style>
-  /* ===================== Body ===================== */
   body { font-family: Arial, sans-serif; margin: 0; padding: 0; height: 100vh; background: black; overflow: hidden; }
   .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; background: black; box-sizing: border-box; }
   .screen.active { opacity: 1; pointer-events: auto; z-index: 1; }
@@ -36,7 +35,7 @@
   .next-btn { margin-top: auto; padding: 10px 24px; font-size: 16px; border-radius: 10px; background: #555; color: white; border: none; cursor: pointer; transition: background 0.2s, transform 0.1s; }
   .next-btn:hover { background: #777; }
   .next-btn:active { transform: scale(0.97); }
-  .question { font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center; }
+  .question { font-size: 24px; font-weight: bold; margin-bottom: 10px; text-align: center; white-space: pre-line; }
   .answer { font-size: 20px; text-align: center; }
   .close-btn { position: absolute; top: 20px; right: 20px; font-size: 32px; font-weight: bold; cursor: pointer; color: white; }
   @media (max-width: 500px) { .btn { padding: 12px; font-size: 14px; } h2 { font-size: 18px; } .btn-grid, .dropdown-grid { flex-direction: column; align-items: center; gap: 10px; } }
@@ -209,7 +208,6 @@ newestYearSelect.addEventListener("change", checkStartReady);
 
 function populateCategories(edition) {
   categoryGrid.innerHTML = "";
-
   editionCategories[edition].forEach(cat => {
     const btn = document.createElement("button");
     btn.classList.add("btn", "category-btn");
@@ -220,24 +218,29 @@ function populateCategories(edition) {
     btn.addEventListener("click", async () => {
       const timeframe = `${oldestYearSelect.value} - ${newestYearSelect.value}`;
       const headerText = `${timeframe} ${cat.name}`;
-
       document.getElementById("cardFront").style.background = cat.color;
       document.getElementById("cardBack").style.background = cat.color;
       frontHeader.textContent = headerText;
       backHeader.textContent = headerText;
 
-      // ================= Fetch from backend Worker =================
       try {
         const res = await fetch(`https://trivialpursuit.samuel-d-davy09.workers.dev/?category=${encodeURIComponent(cat.name)}&timeframe=${encodeURIComponent(timeframe)}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
         const data = await res.json();
 
-        frontQuestion.innerHTML = (data.question || "No question found").replace(/\n/g, "<br>");
-        backQuestion.innerHTML = (data.question || "No question found").replace(/\n/g, "<br>");
-        cardAnswer.innerHTML = data.answer || "No answer found";
+        // Render questions with line breaks
+        function renderQuestion(element, text) {
+          if (!text) element.innerHTML = "No question found";
+          else {
+            const decoded = text.replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, '&');
+            element.innerHTML = decoded.replace(/\n/g, "<br>");
+          }
+        }
+
+        renderQuestion(frontQuestion, data.question);
+        renderQuestion(backQuestion, data.question);
+        cardAnswer.textContent = data.answer || "No answer found";
       } catch (err) {
-        console.error(err);
         frontQuestion.textContent = "Error fetching question";
         backQuestion.textContent = "Error fetching question";
         cardAnswer.textContent = err.toString();
@@ -251,7 +254,6 @@ function populateCategories(edition) {
   });
 }
 
-// ===================== Setup buttons =====================
 startGameBtn.addEventListener("click", () => {
   setupScreen.classList.remove("active");
   populateCategories(selectedEdition);
@@ -276,21 +278,8 @@ card.addEventListener("click", () => {
   card.querySelector(".card-inner").style.transform = `rotateY(${180 * flipCount}deg)`;
 });
 
-closeFront.addEventListener("click", e => {
-  e.stopPropagation();
-  flipCount = 0;
-  card.querySelector(".card-inner").style.transform = 'rotateY(0deg)';
-  cardScreen.classList.remove("active");
-  categoriesScreen.classList.add("active");
-});
-
-closeBack.addEventListener("click", e => {
-  e.stopPropagation();
-  flipCount = 0;
-  card.querySelector(".card-inner").style.transform = 'rotateY(0deg)';
-  cardScreen.classList.remove("active");
-  categoriesScreen.classList.add("active");
-});
+closeFront.addEventListener("click", e => { e.stopPropagation(); flipCount = 0; card.querySelector(".card-inner").style.transform = 'rotateY(0deg)'; cardScreen.classList.remove("active"); categoriesScreen.classList.add("active"); });
+closeBack.addEventListener("click", e => { e.stopPropagation(); flipCount = 0; card.querySelector(".card-inner").style.transform = 'rotateY(0deg)'; cardScreen.classList.remove("active"); categoriesScreen.classList.add("active"); });
 </script>
 
 </body>
